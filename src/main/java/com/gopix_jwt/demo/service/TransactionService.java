@@ -4,6 +4,7 @@ import com.gopix_jwt.demo.dto.CreateTransactionDTO;
 import com.gopix_jwt.demo.dto.TransactionResponseDTO;
 import com.gopix_jwt.demo.entity.Transaction;
 import com.gopix_jwt.demo.entity.User;
+import com.gopix_jwt.demo.enums.TransactionType;
 import com.gopix_jwt.demo.errors.BadRequestException;
 import com.gopix_jwt.demo.repository.TransactionRepository;
 import com.gopix_jwt.demo.repository.UserRepository;
@@ -28,17 +29,17 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransaction(CreateTransactionDTO dto) {
-        User userReceive = userRepository.findById(dto.userReceiveId())
-                .orElseThrow(() -> new BadRequestException("User receiver not found"));
+        User userReceive = userRepository.findByDocument(dto.userReceiveDocument())
+                .orElseThrow(() -> new BadRequestException("Destinatario não encontrado"));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User userProvider = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User provider not found"));
+                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada"));
 
-        if ("transfer".equalsIgnoreCase(dto.type())) {
+        if (dto.type().equals(TransactionType.TRANSFER)) {
             Double availableBalance = calculateAvailableBalance(userProvider.getId());
             if (availableBalance < dto.amount()) {
-                throw new BadRequestException("Insufficient balance to complete the transfer");
+                throw new BadRequestException("Saldo insuficiente para transaferencias.");
             }
         }
 
@@ -47,14 +48,15 @@ public class TransactionService {
                 userProvider,
                 LocalDateTime.now(),
                 dto.amount(),
-                dto.type()
+                dto.type(),
+                dto.category()
         );
         return transactionRepository.save(transaction);
     }
 
     public Double calculateAvailableBalance(Long userId) {
-        Double deposits = transactionRepository.sumAmountByUserAndType(userId, "deposit").orElse(0.0);
-        Double transfers = transactionRepository.sumAmountByUserAndType(userId, "transfer").orElse(0.0);
+        Double deposits = transactionRepository.sumAmountByUserAndType(userId, TransactionType.DEPOSIT).orElse(0.0);
+        Double transfers = transactionRepository.sumAmountByUserAndType(userId, TransactionType.TRANSFER).orElse(0.0);
         return deposits - transfers;
     }
 
@@ -68,12 +70,29 @@ public class TransactionService {
         return transactions.stream()
                 .map(transaction -> new TransactionResponseDTO(
                         transaction.getId(),
-                        transaction.getUserReceive().getEmail(),
+                        transaction.getUserReceive() != null ? transaction.getUserReceive().getDocument() : null,
                         transaction.getUserProvider().getEmail(),
                         transaction.getAmount(),
                         transaction.getType(),
-                        transaction.getDate()
+                        transaction.getDate(),
+                        transaction.getCategory()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public Transaction deposit(CreateTransactionDTO dto){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userProvider = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new BadRequestException("Conta não encontrada"));
+
+        Transaction transaction = new Transaction(
+                null,
+                userProvider,
+                LocalDateTime.now(),
+                dto.amount(),
+                TransactionType.DEPOSIT,
+                dto.category()
+        );
+        return transactionRepository.save(transaction);
     }
 }

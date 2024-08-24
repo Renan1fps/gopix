@@ -1,5 +1,6 @@
 package com.gopix_jwt.demo.entity;
 
+import com.gopix_jwt.demo.enums.TransactionType;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -24,16 +25,20 @@ public class Transaction {
 
     private Double amount;
 
-    private String type;
+    private TransactionType type;
 
-    public Transaction() {}
+    private String category;
 
-    public Transaction(User userReceive, User userProvider, LocalDateTime date, Double amount, String type) {
+    public Transaction() {
+    }
+
+    public Transaction(User userReceive, User userProvider, LocalDateTime date, Double amount, TransactionType type, String category) {
         this.userReceive = userReceive;
         this.userProvider = userProvider;
         this.date = date;
         this.amount = amount;
         this.type = type;
+        this.category = category;
     }
 
     public Long getId() {
@@ -76,11 +81,19 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public String getType() {
+    public TransactionType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TransactionType type) {
         this.type = type;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

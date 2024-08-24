@@ -18,6 +18,8 @@ public class User {
 
     private String password;
 
+    private String document;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -32,10 +34,11 @@ public class User {
     @OneToMany(mappedBy = "userProvider", cascade = CascadeType.ALL)
     private List<Transaction> transactionsProvided;
 
-    public User(Long id, String email, String password, List<Role> roles) {
+    public User(Long id, String email, String password, String document , List<Role> roles) {
         this.id = id;
         this.email = email;
         this.password = password;
+        this.document = document;
         this.roles = roles;
     }
 
@@ -87,5 +90,13 @@ public class User {
 
     public void setTransactionsProvided(List<Transaction> transactionsProvided) {
         this.transactionsProvided = transactionsProvided;
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
     }
 }

@@ -8,6 +8,7 @@ import com.gopix_jwt.demo.dto.LoginUserDto;
 import com.gopix_jwt.demo.dto.RecoveryJwtTokenDto;
 import com.gopix_jwt.demo.entity.Role;
 import com.gopix_jwt.demo.entity.User;
+import com.gopix_jwt.demo.errors.BadRequestException;
 import com.gopix_jwt.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -41,9 +43,15 @@ public class UserService {
     }
 
     public void createUser(CreateUserDto createUserDto) {
+        Optional<User> user = this.userRepository.findByEmail(createUserDto.email());
+
+        if (user.isPresent()) {
+            throw new BadRequestException("Usuário já cadastrado!");
+        }
         User newUser = new User();
         newUser.setEmail(createUserDto.email());
         newUser.setPassword(securityConfiguration.passwordEncoder().encode(createUserDto.password()));
+        newUser.setDocument(createUserDto.document());
         Role role = new Role();
         role.setName(createUserDto.role());
         newUser.setRoles(List.of(role));

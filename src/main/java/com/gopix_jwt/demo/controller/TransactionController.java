@@ -30,4 +30,10 @@ public class TransactionController {
         List<TransactionResponseDTO> transactions = transactionService.getUserTransactions();
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
+
+    @PostMapping("/deposit")
+    public ResponseEntity<Transaction> deposit(@RequestBody CreateTransactionDTO transactionDTO) {
+        Transaction transaction = transactionService.deposit(transactionDTO);
+        return new ResponseEntity<>(transaction, HttpStatus.OK);
+    }
 }
