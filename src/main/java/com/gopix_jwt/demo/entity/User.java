@@ -1,12 +1,12 @@
 package com.gopix_jwt.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 
-@Table(name = "users")
 @Entity(name = "User")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -19,10 +19,18 @@ public class User {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @JoinTable(name="users_roles",
+    @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name="role_id"))
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "userReceive", cascade = CascadeType.ALL)
+    private List<Transaction> transactionsReceived;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "userProvider", cascade = CascadeType.ALL)
+    private List<Transaction> transactionsProvided;
 
     public User(Long id, String email, String password, List<Role> roles) {
         this.id = id;
@@ -31,8 +39,7 @@ public class User {
         this.roles = roles;
     }
 
-    public User() {
-    }
+    public User() {}
 
     public Long getId() {
         return id;
@@ -64,5 +71,21 @@ public class User {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<Transaction> getTransactionsReceived() {
+        return transactionsReceived;
+    }
+
+    public void setTransactionsReceived(List<Transaction> transactionsReceived) {
+        this.transactionsReceived = transactionsReceived;
+    }
+
+    public List<Transaction> getTransactionsProvided() {
+        return transactionsProvided;
+    }
+
+    public void setTransactionsProvided(List<Transaction> transactionsProvided) {
+        this.transactionsProvided = transactionsProvided;
     }
 }

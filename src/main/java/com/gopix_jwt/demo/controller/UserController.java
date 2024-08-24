@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
@@ -38,7 +39,6 @@ public class UserController {
     @GetMapping("/test/customer")
     public ResponseEntity<String> getCustomerAuthenticationTest() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.getPrincipal());
         return new ResponseEntity<>("Cliente autenticado com sucesso", HttpStatus.OK);
     }
 

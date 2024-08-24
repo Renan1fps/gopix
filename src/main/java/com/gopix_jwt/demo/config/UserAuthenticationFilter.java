@@ -1,6 +1,7 @@
 package com.gopix_jwt.demo.config;
 
 import com.gopix_jwt.demo.entity.User;
+import com.gopix_jwt.demo.errors.BadRequestException;
 import com.gopix_jwt.demo.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -40,7 +41,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                throw new RuntimeException("O token está ausente.");
+                throw new BadRequestException("O token está ausente.");
             }
         }
         filterChain.doFilter(request, response);
