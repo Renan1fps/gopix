@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByUserReceiveOrUserProvider(User userReceive, User userProvider);
+    List<Transaction> findByUserProvider(User userProvider);
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.userProvider.id = :userId AND t.type = :type")
     Optional<Double> sumAmountByUserAndType(@Param("userId") Long userId, @Param("type") TransactionType type);
 }

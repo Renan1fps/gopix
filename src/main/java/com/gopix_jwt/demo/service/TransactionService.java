@@ -41,6 +41,24 @@ public class TransactionService {
             if (availableBalance < dto.amount()) {
                 throw new BadRequestException("Saldo insuficiente para transaferencias.");
             }
+            Transaction transactionProvider = new Transaction(
+                    userProvider,
+                    userReceive,
+                    LocalDateTime.now(),
+                    dto.amount(),
+                    TransactionType.DEPOSIT,
+                    dto.category()
+            );
+            Transaction transactionReceive = new Transaction(
+                    userReceive,
+                    userProvider,
+                    LocalDateTime.now(),
+                    dto.amount(),
+                    dto.type(),
+                    dto.category()
+            );
+            transactionRepository.save(transactionProvider);
+            return transactionRepository.save(transactionReceive);
         }
 
         Transaction transaction = new Transaction(
@@ -65,7 +83,7 @@ public class TransactionService {
         User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        List<Transaction> transactions = transactionRepository.findByUserReceiveOrUserProvider(user, user);
+        List<Transaction> transactions = transactionRepository.findByUserProvider(user);
 
         return transactions.stream()
                 .map(transaction -> new TransactionResponseDTO(
